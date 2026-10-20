@@ -25,17 +25,14 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
     private Dictionary<Artifact, bool> _navMeshActivations = new Dictionary<Artifact, bool>();
     private Dictionary<Artifact, float> _wzExitTimes = new Dictionary<Artifact, float>();
     private Dictionary<Artifact, float> _tzExitTimes = new Dictionary<Artifact, float>();
-    //private Dictionary<Artifact, float> _interactionStartTimes = new Dictionary<Artifact, float>();
-    //private Dictionary<Artifact, float> _interactionTimes = new Dictionary<Artifact, float>();
     private Vector3 _lastTrackedPosition;
     private bool _episodeStarted = false;
     private float _episodeStartTime;
-    private float _maxEpisodeDuration = 120f; // 2 minuti
+    private float _maxEpisodeDuration = 120f; // 2 minutes
     private bool _timedOut = false;
 
     // Artifacts Selection
     [SerializeField] private List<Artifact> _assignedArtifacts = new List<Artifact>();
-    //private HashSet<Artifact> _loggedArtifacts = new HashSet<Artifact>();
     public List<Artifact> assignedArtifacts => _assignedArtifacts;
     public int configNumber = 0;
 
@@ -48,7 +45,6 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
     }
     
     private Coroutine _waitForArtifactCoroutine;
-    //private bool isTrackingNavMesh = false;
     
     public ArtifactProximity currentProximity = ArtifactProximity.Far;
     private Artifact approachingArtifact;
@@ -64,7 +60,7 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
     [Tooltip("Enable soft steering towards artifact in warning zone")]
     public bool enableSoftSteering = true;
     
-    [Tooltip("Velocità angolare in gradi/secondo")]
+    [Tooltip("Angular speed in degrees per second")]
     [Range(0f, 360f)] public float angularSpeed = 120f;
 
     [Tooltip("Seconds before agent can reuse same artifact")]
@@ -86,9 +82,6 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
     // Artifact Navigation Properties
     private List<ArtifactTrigger> subscribedTriggers = new List<ArtifactTrigger>();
     private ArtifactNavigationData? currentNavigationData;
-
-    private Action OnNavigationComplete;
-
 
     /// <summary>
     /// True if the agent is using NavMesh for movement.
@@ -300,7 +293,7 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
     /// </summary>
     private ObjectiveInteractionHandler objectiveHandler;
 
-    // Variabili reflection per screenshot curriculum
+    // Reflection fields used for curriculum screenshots
 #if UNITY_EDITOR
     private Curriculum curriculum;
     private Testing testing;
@@ -452,13 +445,14 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
 
     private void Update()
     {
-        // forzare la fine dell'episodio se supera la durata massima, utilizzato per raccolta dati
+        // Force the end of the episode after the maximum duration (used for data collection)
         if (_episodeStarted && Time.time - _episodeStartTime > _maxEpisodeDuration)
         {
             _timedOut = true;
             Finished();
-        return;
+            return;
         }
+
         // If the objective handler is executing animations, skip the update
         if (objectiveHandler != null && objectiveHandler.IsExecutingObjectiveAnimations())
         {
@@ -583,7 +577,7 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
             case Group.Fourth:
                 return Color.yellow;
             default:
-                return Color.white; // Colore di default per gruppi non riconosciuti
+                return Color.white; // Default color for unknown groups
         }
     }
 
@@ -598,12 +592,10 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
         _distancesWZ.Clear();
         _distancesTZ.Clear();
         _navMeshActivations.Clear();
-        _episodeStartTime = 0f;
         _lastTrackedPosition = transform.position;
         _tzExitTimes.Clear();
         _wzExitTimes.Clear();
         _timedOut = false;
-        _episodeStarted = false;
         _episodeStartTime = Time.time;
         _episodeStarted = true;
 
@@ -625,7 +617,6 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
         if (orderAgent)
             orderManager?.ResetOrderState();
 
-        //artifactsUsedThisEpisode.Clear();
         lastUsedArtifact = null;
         artifactCooldownTimer = 0f;
         currentProximity = ArtifactProximity.Far;
@@ -637,16 +628,13 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
             _waitForArtifactCoroutine = null;
         }
         foreach (var a in _assignedArtifacts)
-            a.ResetAccess(); // solo se sei il primo agente, altrimenti sposta nell'env controller
+            a.ResetAccess(); // TODO: should be done once (e.g. by the environment controller), not by every agent
 
         if (steeringCoroutine != null)
         {
             StopCoroutine(steeringCoroutine);
             steeringCoroutine = null;
         }
-        //_loggedArtifacts.Clear();
-        
-        //isTrackingNavMesh = false;
 
         resetAgent?.Invoke(this);
     }
@@ -744,11 +732,10 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
 
             if (enableAnticipatorySlowdown)
             {
-                //
                 actionSpeed = ApplyProximitySpeedModifier(actionSpeed);
             }
 
-            // Non applicare movimenti se le animazioni degli obiettivi sono in corso
+            // Do not move while objective animations are playing
             if (!lockPosition && !(objectiveHandler != null && objectiveHandler.IsExecutingObjectiveAnimations()))
             {
                 AngleChange(actionAngle);
@@ -833,14 +820,9 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
         transform.rotation = startRotation;
         EndEpisode();
         agentTerminated?.Invoke(cumulativeReward, env);
-        
-        // Segnala a Python che ha finito e ferma il Play!
-        //string donePath = System.IO.Path.Combine(UnityEngine.Application.dataPath, "PedPy", "sim_done.txt");
-        //System.IO.File.WriteAllText(donePath, "finito");
 
-        // Notifica il manager
+        // Notify the simulation manager (it ends Play mode and signals the Python pipeline)
         SimulationManager.Instance?.OnAgentFinished();
-        
     }
 
     /**
@@ -1101,7 +1083,6 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
         currentSpeed += minMaxSpeed.y * deltaSpeed / 2f;
         currentSpeed = Mathf.Clamp(currentSpeed, minMaxSpeed.x, minMaxSpeed.y);
         Vector3 velocityChange = (transform.forward * currentSpeed * 5) - rigidBody.velocity;
-        // Vector3 velocityChange = (transform.forward * currentSpeed * GetProximitySpeedFactor() * 5) - rigidBody.velocity;
         rigidBody.AddForce(velocityChange, ForceMode.VelocityChange);
     }
 
@@ -1414,22 +1395,18 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
         if (agentObject != gameObject)
             return;
 
-
         currentProximity = ArtifactProximity.Transition;
-        Debug.Log($"[TZ] {name} entered TZ, approachingArtifact: {approachingArtifact?.ArtifactName ?? "NULL"}");
         if (approachingArtifact != null)
             _tzEntryTimes[approachingArtifact] = Time.time;
         _lastTrackedPosition = transform.position;
-        //isTrackingNavMesh = true;
-    
+
         if (debugging)
             Debug.Log($"[NavMeshTime] {name} START NavMesh for {navigationData.artifact.ArtifactName}");
 
         // Mark artifact as used
         lastUsedArtifact = navigationData.artifact;
         artifactCooldownTimer = Time.time + artifactCooldown;
-        //artifactsUsedThisEpisode.Add(navigationData.artifact);
-    
+
         if (debugging)
             Debug.Log($"[RLAgent] {name} marked {navigationData.artifact.ArtifactName} as used - cooldown until {artifactCooldownTimer:F1}");
 
@@ -1621,30 +1598,28 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
             Debug.Log($"[RLAgentPlanning] ArtifactNavigationHandler already exists on {gameObject.name}");
         }
 
-        // Estrai il valore dalla nullable struct
+        // Unwrap the nullable struct
         ArtifactNavigationData navData = currentNavigationData.Value;
-    
+
         handler.StartNavigation(navData.artifact, navData.destination, navData.exitDestination);
     }
 
-    
-   private void HandleWarningZoneEnter(GameObject agent, Artifact artifact)
+    /// <summary>
+    /// Handles the agent entering the Warning Zone of an artifact.
+    /// </summary>
+    private void HandleWarningZoneEnter(GameObject agent, Artifact artifact)
     {
-        
-        Debug.Log($"[HandleWarningZoneEnter] Called on {name}, agent param: {agent.name}, artifact: {artifact.ArtifactName}");
         if (agent != gameObject) return;
 
-        Debug.Log($"[HandleWarningZoneEnter] {name} passed agent check - proceeding with checks");
-
-        // Check 1: È assegnato?
+        // Check 1: is the artifact assigned to this agent?
         if (!assignedArtifacts.Contains(artifact))
-        { 
+        {
             if (debugging)
                 Debug.Log($"[RLAgent] {name} ignoring {artifact.ArtifactName} - not assigned");
             return;
         }
 
-        // Check 2: Cooldown attivo?
+        // Check 2: is the cooldown active?
         if (lastUsedArtifact == artifact && Time.time < artifactCooldownTimer)
         {
             if (debugging)
@@ -1652,34 +1627,26 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
             return;
         }
 
-        /* Check 3: Già usato questo episodio?
-        if (artifactsUsedThisEpisode.Contains(artifact))
-        {
-            if (debugging)
-                Debug.Log($"[RLAgent] {name} ignoring {artifact.ArtifactName} - already used this episode");
-            return;
-        }
-*/
-        // Check 4: Già approaching un altro artifact?
+        // Check 3: is the agent already approaching another artifact?
         if (approachingArtifact != null && approachingArtifact != artifact)
         {
             if (debugging)
                 Debug.Log($"[RLAgent] {name} already approaching {approachingArtifact.ArtifactName} - ignoring {artifact.ArtifactName}");
             return;
         }
-        Debug.Log($"[HandleWarningZoneEnter] {name} passed ALL checks - IsInUseByOtherAgent: {artifact.IsInUseByOtherAgent(gameObject)}, currentUser: {artifact.GetCurrentUser()?.name ?? "none"}");
 
-        // Prenota subito — prima di qualsiasi altra operazione
+        // Reserve the artifact before doing anything else
         if (!artifact.SetCurrentUser(gameObject))
         {
-            // Artefatto occupato → setta stato e aspetta
+            // Artifact busy: set the state and wait until it is free
             currentProximity = ArtifactProximity.Warning;
             approachingArtifact = artifact;
 
             ArtifactTrigger waitTrigger = artifact.GetComponentInChildren<ArtifactTrigger>();
             approachingTarget = waitTrigger?.destinationTransform ?? artifact.transform;
 
-            Debug.Log($"[RLAgent] {name} WAITING in Warning Zone for {artifact.ArtifactName}");
+            if (debugging)
+                Debug.Log($"[RLAgent] {name} WAITING in Warning Zone for {artifact.ArtifactName}");
             lockPosition = true;
             rigidBody.velocity = Vector3.zero;
             rigidBody.isKinematic = true;
@@ -1705,27 +1672,28 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
         }
         else
         {
-            // Fallback: se non c'è destination, usa centro artifact
+            // Fallback: no destination, use the artifact center
             approachingTarget = artifact.transform;
 
             if (debugging)
                 Debug.LogWarning($"[RLAgent] {name} no destination found for {artifact.ArtifactName}, using artifact center");
         }
 
-
         if (enableSoftSteering)
         {
             steeringCoroutine = StartCoroutine(SoftSteerTowardsArtifact());
         }
 
-        Debug.Log($"[RLAgent] {name} entering WARNING zone of {artifact.ArtifactName}");
+        if (debugging)
+            Debug.Log($"[RLAgent] {name} entering WARNING zone of {artifact.ArtifactName}");
     }
-    
+
+    /// <summary>
+    /// Handles the agent leaving the Warning Zone of an artifact.
+    /// </summary>
     private void HandleWarningZoneExit(GameObject agent, Artifact artifact)
     {
         if (agent != gameObject) return;
-    
-        Debug.Log($"[RLAgent] {name} HandleWarningZoneExit called for {artifact.ArtifactName}, currentProximity: {currentProximity}, approachingArtifact: {approachingArtifact?.ArtifactName ?? "none"}");
 
         if (_waitForArtifactCoroutine != null)
         {
@@ -1740,16 +1708,9 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
             StopCoroutine(steeringCoroutine);
             steeringCoroutine = null;
         }
-        
+
         if (approachingArtifact != null)
-        {
             _wzExitTimes[approachingArtifact] = Time.time;
-            Debug.Log($"[WZExit] {name} wzExit saved for {approachingArtifact.ArtifactName}: {Time.time}");
-        }
-        else
-        {
-            Debug.Log($"[WZExit] {name} approachingArtifact è NULL, wzExit non salvato");
-        }
 
         approachingArtifact = null;
         approachingTarget = null;
@@ -1758,9 +1719,11 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
             currentProximity = ArtifactProximity.Far;
     }
 
+    /// <summary>
+    /// Called by ArtifactNavigationHandler when the interaction ends. Currently unused.
+    /// </summary>
     public void OnArtifactInteractionComplete(Artifact artifact)
     {
-        //_interactionEndTimes[artifact] = Time.time;
     }
 
     private float ApplyProximitySpeedModifier(float baseSpeed)
@@ -1775,42 +1738,6 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
                 return baseSpeed;
         }
     }
-
-
-    /*
-    
-    private float GetProximitySpeedFactor()
-    {
-        if (!enableAnticipatorySlowdown ||
-            currentProximity != ArtifactProximity.Warning ||
-            approachingArtifact == null)
-            return 1f;
-
-        WarningZoneTrigger wz = approachingArtifact.GetComponentInChildren<WarningZoneTrigger>();
-        ArtifactTrigger tz = approachingArtifact.GetComponentInChildren<ArtifactTrigger>();
-        if (wz == null) return warningSpeedMultiplier;
-
-        // Centro della Warning Zone in coordinate mondo, sul piano dell'agente
-        SphereCollider wzCollider = wz.GetComponent<SphereCollider>();
-        Vector3 center = wz.transform.TransformPoint(wzCollider.center);
-        center.y = transform.position.y;
-
-        float wzRadius = wz.WarningRadius;
-        float tzRadius = 0f;
-        if (tz != null)
-        {
-            SphereCollider tzCollider = tz.GetComponent<SphereCollider>();
-            if (tzCollider != null)
-                tzRadius = tzCollider.radius * tz.transform.lossyScale.x;
-        }
-
-        float distance = Vector3.Distance(transform.position, center);
-
-        // t = 0 al bordo della Warning Zone, t = 1 al bordo della Transition Zone
-        float t = Mathf.Clamp01((wzRadius - distance) / Mathf.Max(0.01f, wzRadius - tzRadius));
-        return Mathf.Lerp(1f, warningSpeedMultiplier, t);
-    }
-    */
 
     void OnDrawGizmos()
     {
@@ -1827,13 +1754,15 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
         }
     }
 
+    /// <summary>
+    /// Gradually rotates the agent towards the artifact while it is in the Warning Zone.
+    /// </summary>
     private System.Collections.IEnumerator SoftSteerTowardsArtifact()
     {
-
         while (currentProximity == ArtifactProximity.Warning && approachingTarget != null)
         {
             Vector3 directionToTarget = (approachingTarget.position - transform.position).normalized;
-            directionToTarget.y = 0; // Solo steering orizzontale
+            directionToTarget.y = 0; // Horizontal steering only
 
             if (directionToTarget.magnitude > 0.1f)
             {
@@ -1853,21 +1782,13 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
     }
 
     /// <summary>
-    /// Blocca l'agente nella Warning Zone finché l'artefatto non è libero,
-    /// poi riprende il flusso normale.
+    /// Keeps the agent still in the Warning Zone until the artifact is free,
+    /// then resumes the normal flow.
     /// </summary>
     private System.Collections.IEnumerator WaitForArtifactFree(Artifact artifact)
     {
-
-        float logTimer = 0f;
         while (artifact.IsInUseByOtherAgent(gameObject))
         {
-            logTimer += Time.deltaTime;
-            if (logTimer >= 1f)
-            {
-                Debug.Log($"[RLAgent] {name} still waiting - isKinematic: {rigidBody.isKinematic}, velocity: {rigidBody.velocity}, lockPosition: {lockPosition}");
-                logTimer = 0f;
-            }
             yield return null;
         }
 
@@ -1875,62 +1796,27 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
         rigidBody.isKinematic = false;
         _waitForArtifactCoroutine = null;
 
-        // Prenota l'artefatto
+        // Reserve the artifact
         artifact.SetCurrentUser(gameObject);
 
-        Debug.Log($"[RLAgent] {name} resuming toward {artifact.ArtifactName}");
+        if (debugging)
+            Debug.Log($"[RLAgent] {name} resuming toward {artifact.ArtifactName}");
 
-        // L'agente è già nella Warning Zone con approachingArtifact e approachingTarget settati.
-        // Basta riavviare lo steering — la Transition Zone farà il resto quando l'agente ci arriva.
+        // The agent is already in the Warning Zone with approachingArtifact and approachingTarget set:
+        // restarting the steering is enough, the Transition Zone does the rest.
         if (enableSoftSteering && steeringCoroutine == null)
         {
             steeringCoroutine = StartCoroutine(SoftSteerTowardsArtifact());
         }
     }
-    /*
-    public void LogZoneStats(Artifact artifact)
-    {
-        float wzEntry = _wzEntryTimes.ContainsKey(artifact) ? _wzEntryTimes[artifact] : 0f;
-        float tzEntry = _tzEntryTimes.ContainsKey(artifact) ? _tzEntryTimes[artifact] : 0f;
-        float distWZ = _distancesWZ.ContainsKey(artifact) ? _distancesWZ[artifact] : 0f;
-        float distTZ = _distancesTZ.ContainsKey(artifact) ? _distancesTZ[artifact] : 0f;
-        bool navMesh = _navMeshActivations.ContainsKey(artifact) && _navMeshActivations[artifact];
 
-        float tempoWZ = (wzEntry > 0f && tzEntry > 0f) ? tzEntry - wzEntry : 0f;
-
-        float interactionDuration = artifact.GetComponentInChildren<ArtifactInteractionBehavior>()
-                                        ?.InteractionDuration ?? 0f;
-        float tzExit = _tzExitTimes.ContainsKey(artifact) ? _tzExitTimes[artifact] : 0f;
-        float tempoTZ = (tzEntry > 0f && tzExit > 0f) ? (tzExit - tzEntry) - interactionDuration : 0f;
-        float tempoTot = _episodeStartTime > 0f ? Time.time - _episodeStartTime : 0f;
-
-        float wzRadius = artifact.GetComponentInChildren<WarningZoneTrigger>()?.WarningRadius ?? 0f;
-        float tzRadius = artifact.GetComponentInChildren<ArtifactTrigger>()
-                        ?.GetComponent<SphereCollider>()?.radius ?? 0f;
-
-        string header = "agente\tartifatto\tangularSpeed\twarningSpeedMultiplier\twzRadius\ttzRadius\tposObiettivo\tcampione\ttempoWZ\tnavMesh\tdistanzaWZ\tdistanzaTZ\ttempoTZ\ttempoTot";
-        string line = FormattableString.Invariant(
-            $"{name}\t{artifact.ArtifactName}\t{angularSpeed}\t{warningSpeedMultiplier}\t{wzRadius}\t{tzRadius}\t{posObiettivo}\t{campione}\t{tempoWZ:F2}\t{(navMesh ? 1 : 0)}\t{distWZ:F2}\t{distTZ:F2}\t{tempoTZ:F2}\t{tempoTot:F2}");
-
-        string path = System.IO.Path.Combine(Application.dataPath, "PedPy/ZoneStatsArtifact.txt");
-        string dir = System.IO.Path.GetDirectoryName(path);
-        if (!System.IO.Directory.Exists(dir))
-        {
-            System.IO.Directory.CreateDirectory(dir);
-        }
-        if (!System.IO.File.Exists(path))
-        {
-            System.IO.File.WriteAllText(path, header + "\n");
-        }
-
-        System.IO.File.AppendAllText(path, line + "\n");
-    }
-    */
+    /// <summary>
+    /// Appends one row with the zone metrics of this episode to PedPy/ZoneStatsArtifact.txt.
+    /// </summary>
     public void LogZoneStatsTotal()
     {
         float totWZ = 0f, totTZ = 0f, totDistWZ = 0f, totDistTZ = 0f;
-        //bool navMesh = false;
-        // Contatore per le attivazioni NavMesh solo tra gli artefatti assegnati
+        // NavMesh activations, counted only among the assigned artifacts
         int navMeshActivationsCount = 0;
 
         foreach (var artifact in _assignedArtifacts)
@@ -1940,17 +1826,16 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
             float tzEntry = _tzEntryTimes.ContainsKey(artifact) ? _tzEntryTimes[artifact] : 0f;
             float tzExit = _tzExitTimes.ContainsKey(artifact) ? _tzExitTimes[artifact] : 0f;
 
-            // tempoWZ: usa tzEntry se disponibile, altrimenti wzExit
+            // tempoWZ: up to the TZ entry if available, otherwise up to the WZ exit
             float tempoWZ = wzEntry > 0f ? (tzEntry > 0f ? tzEntry - wzEntry : (wzExit > 0f ? wzExit - wzEntry : 0f)) : 0f;
             float interactionDuration = artifact.GetComponentInChildren<ArtifactInteractionBehavior>()
                                             ?.InteractionDuration ?? 0f;
 
-            totWZ += tempoWZ; // usa il tempoWZ già calcolato sopra con wzExit come fallback
+            totWZ += tempoWZ;
             totTZ += (tzEntry > 0f && tzExit > 0f) ? (tzExit - tzEntry) - interactionDuration : 0f;
             totDistWZ += _distancesWZ.ContainsKey(artifact) ? _distancesWZ[artifact] : 0f;
             totDistTZ += _distancesTZ.ContainsKey(artifact) ? _distancesTZ[artifact] : 0f;
-            //navMesh |= _navMeshActivations.ContainsKey(artifact) && _navMeshActivations[artifact];
-            // Incrementa se la NavMesh è stata usata per questo specifico artefatto
+            // Count the artifact if NavMesh was used for it
             if (_navMeshActivations.ContainsKey(artifact) && _navMeshActivations[artifact])
             {
                 navMeshActivationsCount++;
@@ -1958,28 +1843,22 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
         }
 
         float navMeshPercentage = _assignedArtifacts.Count > 0 ? (float)navMeshActivationsCount / _assignedArtifacts.Count : 0f;
-        
-        Debug.Log($"[ZoneStats] wzEntryTimes count: {_wzEntryTimes.Count}, tzEntryTimes count: {_tzEntryTimes.Count}");
-        foreach (var kv in _wzEntryTimes)
-            Debug.Log($"  artifact: {kv.Key.ArtifactName}, wzEntry: {kv.Value}, tzEntry: {(_tzEntryTimes.ContainsKey(kv.Key) ? _tzEntryTimes[kv.Key].ToString() : "MANCANTE")}");
-            
 
-        Debug.Log($"[ZoneStats] Time.time={Time.time}, _episodeStartTime={_episodeStartTime}");
         float tempoTot = _episodeStarted ? Time.time - _episodeStartTime : 0f;
 
         if (_assignedArtifacts == null || _assignedArtifacts.Count == 0)
         {
-            Debug.LogWarning("[ZoneStats] _assignedArtifacts vuoto, skip log.");
+            Debug.LogWarning("[ZoneStats] _assignedArtifacts is empty, skipping log.");
             return;
         }
 
-        // Prendi wzRadius e tzRadius dal primo artefatto assegnato
+        // wzRadius and tzRadius are taken from the first assigned artifact
         Artifact first = _assignedArtifacts[0];
         float wzRadius = first.GetComponentInChildren<WarningZoneTrigger>()?.WarningRadius ?? 0f;
         float tzRadius = first.GetComponentInChildren<ArtifactTrigger>()
                             ?.GetComponent<SphereCollider>()?.radius ?? 0f;
 
-        // Dichiarazione path PRIMA del check timeout
+        // Create the file and header before the timeout check
         string path = System.IO.Path.Combine(Application.dataPath, "PedPy/ZoneStatsArtifact.txt");
         string dir = System.IO.Path.GetDirectoryName(path);
         if (!System.IO.Directory.Exists(dir))
@@ -1989,19 +1868,22 @@ public class RLAgentPlanning : Agent, IAgentRLPlanning, IAgentOrder // order log
         if (!System.IO.File.Exists(path))
             System.IO.File.WriteAllText(path, header + "\n");
 
-        // Ora il check timeout
+        // Timed-out episode: all metrics are 0
         if (_timedOut)
         {
-            string timeoutLine = FormattableString.Invariant($"{name}\t{configNumber}\t{angularSpeed}\t{warningSpeedMultiplier}\t{wzRadius}\t{tzRadius}\t{posObiettivo}\t{campione}\t0\t0\t0\t0\t0\t0"); 
+            string timeoutLine = FormattableString.Invariant($"{name}\t{configNumber}\t{angularSpeed}\t{warningSpeedMultiplier}\t{wzRadius}\t{tzRadius}\t{posObiettivo}\t{campione}\t0\t0\t0\t0\t0\t0");
             System.IO.File.AppendAllText(path, timeoutLine + "\n");
             return;
         }
 
-        // Riga normale: timeout=0
+        // Normal row
         string line = FormattableString.Invariant($"{name}\t{configNumber}\t{angularSpeed}\t{warningSpeedMultiplier}\t{wzRadius}\t{tzRadius}\t{posObiettivo}\t{campione}\t{totWZ:F2}\t{navMeshPercentage:F2}\t{totDistWZ:F2}\t{totDistTZ:F2}\t{totTZ:F2}\t{tempoTot:F2}");
         System.IO.File.AppendAllText(path, line + "\n");
     }
 
+    /// <summary>
+    /// Appends one row per assigned artifact to PedPy/ArtifactStatsDetail.txt.
+    /// </summary>
     public void LogArtifactStatsDetail()
     {
         string path = System.IO.Path.Combine(Application.dataPath, "PedPy/ArtifactStatsDetail.txt");

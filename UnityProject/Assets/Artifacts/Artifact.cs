@@ -65,7 +65,7 @@ public abstract class Artifact : MonoBehaviour {
     }
 
     /// <summary>
-    /// Restituisce true se l'artefatto è in uso da un agente diverso da quello passato.
+    /// Returns true if the artifact is in use by an agent other than the given one.
     /// </summary>
     public bool IsInUseByOtherAgent(GameObject agent)
     {
@@ -73,7 +73,8 @@ public abstract class Artifact : MonoBehaviour {
     }
 
     /// <summary>
-    /// Registra l'agente come utente corrente dell'artefatto.
+    /// Registers the agent as the current user of the artifact.
+    /// Returns false if another agent is already using it.
     /// </summary>
     public bool SetCurrentUser(GameObject agent)
     {
@@ -83,16 +84,14 @@ public abstract class Artifact : MonoBehaviour {
             return false;
         }
         _currentUser = agent;
-        Debug.Log($"[Artifact] {ArtifactName} SetCurrentUser: {agent.name}\n{System.Environment.StackTrace}");
         return true;
     }
 
     /// <summary>
-    /// Rilascia l'artefatto. Chiamato quando l'agente finisce l'interazione.
+    /// Releases the artifact. Called when the agent finishes the interaction.
     /// </summary>
     public void ReleaseUser(GameObject agent)
     {
-        Debug.Log($"[Artifact] {ArtifactName} ReleaseUser called by {agent.name}, currentUser: {_currentUser?.name ?? "none"}\n{System.Environment.StackTrace}");
         if (_currentUser == agent)
         {
             _currentUser = null;
@@ -101,11 +100,10 @@ public abstract class Artifact : MonoBehaviour {
     }
 
     /// <summary>
-    /// Reset a fine episodio.
+    /// Resets the access state at the end of an episode.
     /// </summary>
     public void ResetAccess()
     {
-        Debug.Log($"[Artifact] {ArtifactName} ResetAccess called\n{System.Environment.StackTrace}");
         _currentUser = null;
     }
 }

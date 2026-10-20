@@ -34,7 +34,6 @@ public class ArtifactTrigger : MonoBehaviour
 
     private HashSet<GameObject> agentsInNavigation = new HashSet<GameObject>();
 
-
     private void SetupCollider()
     {
         SphereCollider collider = GetComponent<SphereCollider>();
@@ -46,8 +45,8 @@ public class ArtifactTrigger : MonoBehaviour
         {
             collider.center = transform.InverseTransformPoint(centerTarget.position);
         }
-
     }
+
     void OnValidate()
     {
         SetupCollider();
@@ -110,12 +109,7 @@ public class ArtifactTrigger : MonoBehaviour
     {
         if (other.CompareTag("Agente"))
         {
-            RLAgentPlanning agent = other.GetComponent<RLAgentPlanning>();
-            if (agent != null && agent.currentProximity == RLAgentPlanning.ArtifactProximity.Transition)
-        {
-            // Torna a Far solo se non è più in warning zone
-            // (questo viene gestito da WarningZone exit event)
-        }
+            // The proximity state goes back to Far in the WarningZoneTrigger exit event
 
             if (debugging)
                 Debug.Log($"[ArtifactTrigger] Agent {other.name} exited trigger zone");

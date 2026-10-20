@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class ConfigLoader : MonoBehaviour
 {
-    [Header("Config file path (relativo ad Application.dataPath/PedPy/)")]
+    [Header("Config file path (relative to Application.dataPath/PedPy/)")]
     [SerializeField] private string configFileName = "config.json";
 
     void Awake()
@@ -14,24 +14,24 @@ public class ConfigLoader : MonoBehaviour
 
         if (!File.Exists(path))
         {
-            Debug.LogWarning($"[ConfigLoader] config.json non trovato in {path}");
+            Debug.LogWarning($"[ConfigLoader] config.json not found in {path}");
             return;
         }
 
         string json = File.ReadAllText(path);
         ConfigData config = JsonUtility.FromJson<ConfigData>(json);
 
-        Debug.Log($"[ConfigLoader] Carico config #{config.configNumber} — scena: {config.sceneName}");
+        Debug.Log($"[ConfigLoader] Loading config #{config.configNumber}, scene: {config.sceneName}");
 
-        // Se la scena attualmente aperta NON è quella richiesta dal JSON, caricala!
+        // If the active scene is not the one requested in the JSON, load it
         if (SceneManager.GetActiveScene().name != config.sceneName)
         {
-            Debug.Log($"[ConfigLoader] Cambio scena in automatico verso: {config.sceneName}");
+            Debug.Log($"[ConfigLoader] Switching to scene: {config.sceneName}");
             SceneManager.LoadScene(config.sceneName);
-            return; // Interrompe l'Awake qui, verrà rieseguito nella nuova scena
+            return; // Awake runs again in the new scene
         }
 
-        // Se siamo già nella scena giusta, applica i parametri
+        // Already in the right scene: apply the parameters
         ApplyToAgent(config);
         ApplyToWarningZones(config);
         ApplyToTransitionZones(config);
@@ -47,15 +47,15 @@ public class ConfigLoader : MonoBehaviour
             agent.campione               = config.campione;
             agent.posObiettivo = config.posObiettivo;
             agent.configNumber = config.configNumber;
-            Debug.Log($"[ConfigLoader] configNumber impostato: {agent.configNumber}");
-            Debug.Log($"[ConfigLoader] Agente {agent.name}: angularSpeed={config.angularSpeed}, " +
+            Debug.Log($"[ConfigLoader] configNumber set: {agent.configNumber}");
+            Debug.Log($"[ConfigLoader] Agent {agent.name}: angularSpeed={config.angularSpeed}, " +
                       $"warningSpeedMultiplier={config.warningSpeedMultiplier}, campione={config.campione}");
         }
     }
 
     private void ApplyToWarningZones(ConfigData config)
     {
-        // Trova tutti i WarningZoneTrigger nella scena
+        // Find all WarningZoneTriggers in the scene
         WarningZoneTrigger[] zones = FindObjectsOfType<WarningZoneTrigger>();
         foreach (var zone in zones)
         {
@@ -66,7 +66,7 @@ public class ConfigLoader : MonoBehaviour
 
     private void ApplyToTransitionZones(ConfigData config)
     {
-        // Trova tutti gli ArtifactTrigger nella scena
+        // Find all ArtifactTriggers (transition zones) in the scene
         ArtifactTrigger[] triggers = FindObjectsOfType<ArtifactTrigger>();
         foreach (var trigger in triggers)
         {

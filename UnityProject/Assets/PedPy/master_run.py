@@ -1,12 +1,20 @@
+"""
+master_run.py
+Runs the whole simulation pipeline, one configuration at a time:
+set_config.py -> Unity (via start_play.txt / sim_done.txt) -> pedPy.py,
+then fill_excel.py at the end (also after Ctrl+C).
+
+Usage: python master_run.py [start_config]
+"""
 import os
 import sys
 import time
 
-# Valori di default
-START_CONFIG = 1297 #1  
-END_CONFIG   = 1476 #1296 
+# Configuration range (main grid: 1-1296, integrative test: 1297-1476)
+START_CONFIG = 1297
+END_CONFIG   = 1476
 
-# Ripresa da dove ci si era fermati
+# Optional start configuration, to resume an interrupted run
 if len(sys.argv) > 1:
     try:
         START_CONFIG = int(sys.argv[1])
@@ -21,42 +29,28 @@ try:
         print(f"\n{'='*50}")
         print(f"CONFIGURATION {config_num}/{END_CONFIG}")
         print(f"{'='*50}")
-        
-        # Scrivi config.json
+
+        # Write config.json
         os.system(f"python set_config.py {config_num}")
-        
-        # Leggi config.json per mostrare info utili
-        import json
-        try:
-            with open("config.json") as f:
-                cfg = json.load(f)
-            #print(f"Scena:    {cfg['sceneName']} | Angular: {cfg['angularSpeed']} | WarnMult: {cfg['warningSpeedMultiplier']}")
-        except:
-            pass
-        
-	# Salta configurazioni con tzRadius troppo piccolo
-        #if cfg.get('tzRadius', 0) != 0.75:
-            #print(f" tzRadius={cfg['tzRadius']} — configurazione saltata")
-            #continue
 
         print("Telling Unity to start...")
-        
-        # Crea il file che fa scattare l'AutoPlayManager in Unity
+
+        # This file triggers AutoPlayManager in Unity
         with open("start_play.txt", "w") as f:
             f.write("go")
-        
+
         print("Waiting for the simulation to end...")
-        
-        # Continua a girare in tondo finché Unity non crea il file "sim_done.txt"
+
+        # Wait until Unity writes sim_done.txt
         while not os.path.exists("sim_done.txt"):
             time.sleep(0.5)
-            
-        # Unity ha finito e ha creato il file! Lo eliminiamo per il prossimo giro.
+
+        # Remove it for the next configuration
         os.remove("sim_done.txt")
-        
+
         print("Simulation ended. Generating graphs...")
-        
-        # Lancia l'analisi e salva il grafico
+
+        # Run the analysis and save the trajectory plot
         os.system(f"python pedPy.py {config_num}")
 
 except KeyboardInterrupt:

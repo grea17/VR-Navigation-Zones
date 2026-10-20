@@ -12,7 +12,7 @@ public class ElementData {
     public string name;
     public string type;
     public float x;
-    public float y; 
+    public float y;
     public float size_x;
     public float size_y;
     public float rotation;
@@ -33,23 +33,23 @@ public class PedPySceneExporter : MonoBehaviour {
         if (targetsGroup) AddFromGroup(targetsGroup, "Target", data);
 
         ExportWarningZones(data);
-        
+
         ExportTransitionZones(data);
 
         string json = JsonUtility.ToJson(data, true);
         string path = Path.Combine(Application.dataPath, "PedPy/SceneBlueprint.json");
         File.WriteAllText(path, json);
-        Debug.Log($"Blueprint esportato: {data.Items.Count} elementi attivi con coordinate, dimensioni e rotazione!");
+        Debug.Log($"Blueprint exported: {data.Items.Count} active elements with position, size and rotation");
     }
 
     void AddFromGroup(GameObject group, string type, SceneData data)
     {
         foreach (Transform child in group.transform)
         {
-            // Esporta solo se il GameObject è attivo nella scena
+            // Export only GameObjects that are active in the scene
             if (!child.gameObject.activeInHierarchy)
             {
-                Debug.Log($"[Skipped] {child.name} (non attivo)");
+                Debug.Log($"[Skipped] {child.name} (inactive)");
                 continue;
             }
 
@@ -66,15 +66,15 @@ public class PedPySceneExporter : MonoBehaviour {
             });
         }
     }
-    
+
     void ExportWarningZones(SceneData data) {
         WarningZoneTrigger[] warningZones = FindObjectsOfType<WarningZoneTrigger>();
-        
-        Debug.Log($"[Export] Trovate {warningZones.Length} Warning Zones");
-        
+
+        Debug.Log($"[Export] Found {warningZones.Length} Warning Zones");
+
         foreach (var wz in warningZones) {
             if (!wz.gameObject.activeInHierarchy) {
-                Debug.Log($"[Skipped] WarningZone {wz.name} (non attiva)");
+                Debug.Log($"[Skipped] WarningZone {wz.name} (inactive)");
                 continue;
             }
 
@@ -86,23 +86,22 @@ public class PedPySceneExporter : MonoBehaviour {
                 type = "WarningZone",
                 x = wz.transform.position.x,
                 y = wz.transform.position.z,
-                size_x = radius * 2, // Diametro per compatibilità
+                size_x = radius * 2, // Diameter, for compatibility
                 size_y = radius * 2,
-                rotation = 0, // Zone circolari, rotazione non rilevante
+                rotation = 0, // Circular zones: rotation is irrelevant
                 radius = radius
             });
         }
     }
 
-    
     void ExportTransitionZones(SceneData data) {
         ArtifactTrigger[] triggers = FindObjectsOfType<ArtifactTrigger>();
-        
-        Debug.Log($"[Export] Trovati {triggers.Length} Artifact Triggers");
-        
+
+        Debug.Log($"[Export] Found {triggers.Length} Artifact Triggers");
+
         foreach (var trigger in triggers) {
             if (!trigger.gameObject.activeInHierarchy) {
-                Debug.Log($"[Skipped] ArtifactTrigger {trigger.name} (non attivo)");
+                Debug.Log($"[Skipped] ArtifactTrigger {trigger.name} (inactive)");
                 continue;
             }
 

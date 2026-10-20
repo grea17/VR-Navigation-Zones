@@ -15,17 +15,16 @@ public class SimulationManager : MonoBehaviour
 
     private void Start()
     {
-        // Conta gli agenti all'avvio della simulazione
-        //_totalAgents = FindObjectsOfType<RLAgentPlanning>().Length;
+        // Count the agents at the start of the simulation
         _totalAgents = GameObject.FindGameObjectsWithTag("Agente").Length;
         _finishedAgents = 0;
-        Debug.Log($"[SimulationManager] Agenti registrati: {_totalAgents}");
+        Debug.Log($"[SimulationManager] Registered agents: {_totalAgents}");
     }
 
     public void OnAgentFinished()
     {
         _finishedAgents++;
-        Debug.Log($"[SimulationManager] {_finishedAgents}/{_totalAgents} agenti terminati");
+        Debug.Log($"[SimulationManager] {_finishedAgents}/{_totalAgents} agents finished");
 
         if (_finishedAgents >= _totalAgents)
             EndSimulation();
@@ -33,7 +32,7 @@ public class SimulationManager : MonoBehaviour
 
     private void EndSimulation()
     {
-        Debug.Log("[SimulationManager] Tutti gli agenti terminati — fine simulazione");
+        Debug.Log("[SimulationManager] All agents finished, ending simulation");
 
         string donePath = Path.Combine(Application.dataPath, "PedPy", "sim_done.txt");
         File.WriteAllText(donePath, "done");

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// Shared animation action struct used by both RLAgent and RLAgent1.
-/// Estratto dalla classe RLAgent per evitare conflitti di tipo.
+/// Extracted from the RLAgent class to avoid type conflicts.
 /// </summary>
 [Serializable]
 public struct AgentAnimationAction

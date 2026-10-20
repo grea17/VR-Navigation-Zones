@@ -1,17 +1,23 @@
+"""
+set_config.py
+Reads one configuration from the Excel grid and writes it to config.json,
+which ConfigLoader.cs reads when Unity enters Play mode.
+
+Usage: python set_config.py <config_number>
+"""
 import pandas as pd
 import json
 import sys
 import os
 
-#EXCEL_PATH = "steering_test.xlsx"
+# Excel grid: "steering_test.xlsx" (main grid) or "test_integrativo.xlsx" (integrative test)
 EXCEL_PATH = "test_integrativo.xlsx"
 CONFIG_PATH = "config.json"
 
 df = pd.read_excel(EXCEL_PATH, sheet_name="Test Completo", header=0)
 df.columns = [str(c).strip() for c in df.columns]
 
-
-# Rinomina colonne per comodità
+# Short column names
 col_map = {
     "angularSpeed\n(°/s)":          "angularSpeed",
     "warningSpeed\nMultiplier":      "warningSpeedMultiplier",
@@ -22,16 +28,15 @@ col_map = {
 }
 df = df.rename(columns=col_map)
 
-# Numero configurazione da riga command line (1-based)
+# Configuration number from the command line (1-based)
 if len(sys.argv) < 2:
-    print("Uso: python set_config.py <numero_configurazione>")
+    print("Usage: python set_config.py <config_number>")
     sys.exit(1)
 
 config_num = int(sys.argv[1])
-#row = df.iloc[config_num - 1]
 row = df[df["Configurazione"] == config_num].iloc[0]
 
-# Determina scena in base a posObiettivo
+# The scene depends on the objective position
 pos = str(row["posObiettivo"]).strip()
 scene = "WZ1" if pos == "Dentro WZ" else "WZ2"
 
@@ -49,7 +54,7 @@ config = {
 with open(CONFIG_PATH, "w") as f:
     json.dump(config, f, indent=2)
 
-print(f"Config {config_num} scritta → scena: {scene}, angularSpeed: {config['angularSpeed']}, "
+print(f"Config {config_num} written -> scene: {scene}, angularSpeed: {config['angularSpeed']}, "
       f"warningSpeedMultiplier: {config['warningSpeedMultiplier']}, "
       f"wzRadius: {config['wzRadius']}, tzRadius: {config['tzRadius']}, "
       f"campione: {config['campione']}")

@@ -13,7 +13,6 @@ public class ArtifactInteractionBehavior : MonoBehaviour
 {
     [Header("Interaction Settings")]
     [SerializeField] private float interactionDuration = 2f;
-    
     [SerializeField] private bool stopAgentDuringInteraction = true;
     [SerializeField] private bool oneTimeUsePerAgent = false; 
 

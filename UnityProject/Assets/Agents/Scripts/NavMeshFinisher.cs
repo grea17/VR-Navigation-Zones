@@ -1,4 +1,3 @@
-/*
 using UnityEngine;
 using UnityEngine.AI;
 using System.IO;
@@ -7,59 +6,10 @@ using System.IO;
 public class NavMeshEpisodeEndChecker : MonoBehaviour
 {
     public NavMeshAgent agent;
-    private bool episodioFinito = false;
 
-    void Start()
-    {
-        // Se dimentichi di assegnarlo nell'Inspector, lo prende in automatico
-        if (agent == null) agent = GetComponent<NavMeshAgent>();
-    }
-
-    void Update()
-    {
-        if (episodioFinito) return;
-
-        // Attenzione: remainingDistance a volte restituisce Infinity se il target è fuori dalla mesh.
-        // Se l'agente non si ferma mai, il problema sarà qui.
-        if (!agent.pathPending && 
-            agent.remainingDistance <= agent.stoppingDistance && 
-            (!agent.hasPath || agent.velocity.sqrMagnitude < 0.01f))
-        {
-            episodioFinito = true;
-            agent.isStopped = true;
-
-            Debug.Log("🎯 Episodio NavMesh terminato: target raggiunto.");
-
-            // 1. Chiude correttamente la simulazione lato Unity
-            if (SimulationManager.Instance != null)
-            {
-                SimulationManager.Instance.OnAgentFinished();
-            }
-
-            // 2. Genera il file per sbloccare Python
-            File.WriteAllText("sim_done.txt", "done");
-
-            // 3. Ferma automaticamente la modalità Play nell'Editor
-            #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-            #endif
-        }
-    }
-}
-*/
-
-using UnityEngine;
-using UnityEngine.AI;
-using System.IO;
-
-[RequireComponent(typeof(NavMeshAgent))]
-public class NavMeshEpisodeEndChecker : MonoBehaviour
-{
-    public NavMeshAgent agent;
-    
-    [Header("Impostazioni Fine Episodio")]
-    public Transform targetFinale; // L'oggetto traguardo
-    public float raggioArrivo = 1.0f; // Distanza per considerare l'episodio finito
+    [Header("Episode end settings")]
+    public Transform targetFinale; // Final target object
+    public float raggioArrivo = 1.0f; // Distance at which the episode ends
 
     private bool episodioFinito = false;
 
@@ -74,12 +24,12 @@ public class NavMeshEpisodeEndChecker : MonoBehaviour
 
         if (targetFinale != null)
         {
-            // Calcola la distanza 2D (solo assi X e Z) tra l'agente e il target finale
+            // 2D distance (X and Z only) between the agent and the final target
             float distX = transform.position.x - targetFinale.position.x;
             float distZ = transform.position.z - targetFinale.position.z;
             float distanza2D = Mathf.Sqrt(distX * distX + distZ * distZ);
 
-            // Se l'agente entra nel raggio del target finale, chiudi l'episodio
+            // End the episode when the agent is within the arrival radius
             if (distanza2D <= raggioArrivo)
             {
                 TerminaEpisodio();
@@ -87,31 +37,31 @@ public class NavMeshEpisodeEndChecker : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("NavMeshEpisodeEndChecker: Manca il 'Target Finale' nell'Inspector!");
+            Debug.LogWarning("NavMeshEpisodeEndChecker: 'Target Finale' is not set in the Inspector");
         }
     }
 
     private void TerminaEpisodio()
     {
         episodioFinito = true;
-        
+
         if (agent.isOnNavMesh)
         {
             agent.isStopped = true;
         }
 
-        Debug.Log("🎯 Episodio NavMesh terminato: target FINALE raggiunto.");
+        Debug.Log("NavMesh episode ended: final target reached.");
 
-        // 1. Chiude correttamente la simulazione lato Unity
+        // 1. Notify the simulation manager
         if (SimulationManager.Instance != null)
         {
             SimulationManager.Instance.OnAgentFinished();
         }
 
-        // 2. Genera il file per sbloccare Python
+        // 2. Write the file that unblocks the Python pipeline
         File.WriteAllText(@"C:\Users\gererea\VR_Navigation\VR_Navigation\Assets\PedPy\sim_done.txt", "done");
 
-        // 3. Ferma automaticamente la modalità Play nell'Editor
+        // 3. Exit Play mode in the Editor
         #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
         #endif

@@ -4,7 +4,7 @@
     NewTarget,
     TakenTarget,
     Agent,
-    Obiettivo       // waypoint intermedio sequenziale
+    Obiettivo       // sequential intermediate waypoint
 }
 
 public static class MyGizmosTagExtensions

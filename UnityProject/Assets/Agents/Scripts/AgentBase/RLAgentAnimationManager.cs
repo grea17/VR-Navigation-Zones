@@ -102,7 +102,7 @@ public class RLAgentAnimationManager : AgentAnimationManager
     }
 
     // -------------------------------------------------------
-    // Overload per RLAgent (originale) — invariato
+    // Overload for RLAgent (original version, unchanged)
     // -------------------------------------------------------
     public IEnumerator PlayAnimationsSequence(List<RLAgent.AnimationAction> animations, IAgentRL agent)
     {
@@ -128,7 +128,7 @@ public class RLAgentAnimationManager : AgentAnimationManager
     }
 
     // -------------------------------------------------------
-    // Overload per RLAgent1 — usa AgentAnimationAction condiviso
+    // Overload for RLAgent1, uses the shared AgentAnimationAction
     // -------------------------------------------------------
     public IEnumerator PlayAnimationsSequence(List<AgentAnimationAction> animations, IAgentRL agent)
     {

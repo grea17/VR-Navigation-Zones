@@ -8,19 +8,19 @@ public static class AutoPlayManager
 {
     static AutoPlayManager()
     {
-        // Questo fa sì che Unity controlli costantemente questa funzione
+        // Run Update on every editor tick
         EditorApplication.update += Update;
     }
 
     static void Update()
     {
-        // Ottieni il percorso esatto per Assets/PedPy/start_play.txt
+        // Trigger file written by master_run.py: Assets/PedPy/start_play.txt
         string path = Path.Combine(Application.dataPath, "PedPy", "start_play.txt");
 
         if (!EditorApplication.isPlaying && File.Exists(path))
         {
-            File.Delete(path); // Cancellalo per non premerlo all'infinito
-            EditorApplication.isPlaying = true; // PREME PLAY!
+            File.Delete(path); // Delete it so Play is pressed only once
+            EditorApplication.isPlaying = true; // Enter Play mode
         }
     }
 }

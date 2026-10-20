@@ -58,7 +58,7 @@ public class WarningZoneTrigger : MonoBehaviour
     {
         float parentScale = transform.parent != null ? transform.parent.lossyScale.x : 1f;
         transform.localScale = Vector3.one / parentScale;
-    
+
         SphereCollider collider = GetComponent<SphereCollider>();
         if (collider == null)
         {
@@ -71,15 +71,15 @@ public class WarningZoneTrigger : MonoBehaviour
         if (centerTarget != null)
         {
             SphereCollider targetCollider = centerTarget.GetComponent<SphereCollider>();
-    
+
             Vector3 worldCenter = targetCollider != null
                 ? centerTarget.TransformPoint(targetCollider.center)
                 : centerTarget.position;
-    
+
             Vector3 localCenter = transform.InverseTransformPoint(worldCenter);
             collider.center = localCenter;
         }
-    
+
         if (debugging)
         {
             Artifact artifact = GetTargetArtifact();
@@ -90,7 +90,6 @@ public class WarningZoneTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"[WarningZone] Something entered: {other.name}, tag: {other.tag}");
         if (other.CompareTag("Agente"))
         {
             RLAgentPlanning agent = other.GetComponentInParent<RLAgentPlanning>();
@@ -146,10 +145,10 @@ public class WarningZoneTrigger : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        // Usa il center del collider se disponibile, altrimenti transform.position
+        // Use the collider center if available, otherwise transform.position
         SphereCollider col = GetComponent<SphereCollider>();
         Vector3 center = col != null
-            ? transform.TransformPoint(col.center)  // converte local → world
+            ? transform.TransformPoint(col.center)  // local to world
             : transform.position;
 
         if (showSolidSphere)
@@ -164,12 +163,13 @@ public class WarningZoneTrigger : MonoBehaviour
             Gizmos.DrawWireSphere(center, warningRadius);
         }
     }
+
     public float WarningRadius => warningRadius;
 
     public void RemoveAgent(GameObject agent)
     {
         agentsInWarningZone.Remove(agent);
-    }   
+    }
 
     public void SetWarningRadius(float radius)
     {
@@ -177,5 +177,4 @@ public class WarningZoneTrigger : MonoBehaviour
         SphereCollider sc = GetComponent<SphereCollider>();
         if (sc != null) sc.radius = radius;
     }
-    
 }

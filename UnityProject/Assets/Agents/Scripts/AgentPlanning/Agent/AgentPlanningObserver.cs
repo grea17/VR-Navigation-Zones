@@ -177,7 +177,6 @@ public class AgentPlanningObserver : MonoBehaviour
         foreach (RaycastHit observation in results)
         {
             if (observation.collider == null) continue; // Controllo null dalla versione old
-            Debug.Log($"[Observer] Hit: {observation.collider.gameObject.name}, tag: {observation.collider.tag}, layer: {observation.collider.gameObject.layer}");
             
             GameObject seenObject = observation.collider.gameObject;
             Tag objTag = seenObject.tag.ToMyTags();
