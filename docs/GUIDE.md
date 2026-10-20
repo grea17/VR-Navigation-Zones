@@ -68,13 +68,16 @@ Recommended hierarchy:
 ```
 Totem4                 Artifact subclass (e.g. TotemArtifact) + ArtifactInteractionBehavior
 ├── WarningZone        WarningZoneTrigger (SphereCollider added automatically)
-├── TransitionZone     ArtifactTrigger + SphereCollider (Is Trigger)
-├── InteractionPoint   empty Transform: where the agent stops to use the artifact
-└── ExitPoint          empty Transform: where the agent goes after the interaction
+└── TransitionZone     ArtifactTrigger + SphereCollider (Is Trigger)
 ```
 
 The scripts find each other with `GetComponentInChildren` / `GetComponentInParent`: the zones must be
 **children of the artifact** (or on the artifact itself).
+
+The interaction point and the exit point are not separate scripts. They are two fields of
+`ArtifactTrigger`, **Destination Transform** and **Exit Destination**, set in the Inspector.
+Each field references a position in the scene, for example an empty GameObject placed where the
+agent should stop.
 
 ### WarningZoneTrigger
 
