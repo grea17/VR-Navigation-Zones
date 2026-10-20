@@ -9,6 +9,7 @@ Unity project and experiment pipeline of the bachelor thesis
 
 - Thesis: [`docs/tesi.pdf`](docs/tesi.pdf)
 - Presentation: [`docs/presentazione_tesi.pdf`](docs/presentazione_tesi.pdf)
+- Guide to the zone system (setup in new scenes, parameters, output files): [`docs/GUIDE.md`](docs/GUIDE.md)
 - Online questionnaire: <https://geremyrea.github.io/studio-movimento/>
 
 ## Overview
@@ -28,7 +29,8 @@ This thesis adds two concentric zones around each artifact:
 
 The agent logic is in `RLAgentPlanning.cs` (proximity states `Far` → `Warning` → `Transition`).
 An automated pipeline runs the parameter grid, measures time and distance in each zone and
-saves a trajectory plot for every run.
+saves a trajectory plot for every run. See [`docs/GUIDE.md`](docs/GUIDE.md) to add the zones
+to new artifacts or scenes.
 
 ## Repository structure
 
@@ -44,7 +46,7 @@ UnityProject/           Unity project (open this folder in Unity Hub)
   requirements_windows.txt, requirements_macos.yml   ML-Agents environment of the original project
 analysis/               Jupyter notebook with the statistical analysis
 data/                   results used in the thesis
-docs/                   thesis and presentation (PDF)
+docs/                   thesis and presentation (PDF), GUIDE.md
 ```
 
 ## Requirements
