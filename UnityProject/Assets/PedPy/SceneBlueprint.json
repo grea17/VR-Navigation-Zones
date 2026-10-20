@@ -1,0 +1,184 @@
+{
+    "Items": [
+        {
+            "name": "Objective (0)",
+            "type": "Objective",
+            "x": 1.1384891271591187,
+            "y": 3.2032268047332765,
+            "size_x": 2.0,
+            "size_y": 1.0,
+            "rotation": 0.0,
+            "radius": 0.0
+        },
+        {
+            "name": "Objective (1)",
+            "type": "Objective",
+            "x": 4.638489246368408,
+            "y": 12.38322639465332,
+            "size_x": 2.0,
+            "size_y": 1.0,
+            "rotation": 0.0,
+            "radius": 0.0
+        },
+        {
+            "name": "Objective (3)",
+            "type": "Objective",
+            "x": -7.051510810852051,
+            "y": 3.153226852416992,
+            "size_x": 2.0,
+            "size_y": 1.0,
+            "rotation": 0.0,
+            "radius": 0.0
+        },
+        {
+            "name": "Objective (4)",
+            "type": "Objective",
+            "x": -10.631510734558106,
+            "y": 13.083227157592774,
+            "size_x": 2.0,
+            "size_y": 1.0,
+            "rotation": 0.0,
+            "radius": 0.0
+        },
+        {
+            "name": "Objective (6)",
+            "type": "Objective",
+            "x": -2.2615108489990236,
+            "y": 20.63322639465332,
+            "size_x": 1.5392512083053589,
+            "size_y": 1.5140657424926758,
+            "rotation": 0.0,
+            "radius": 0.0
+        },
+        {
+            "name": "FinalTarget",
+            "type": "Target",
+            "x": 12.349313735961914,
+            "y": 18.27503204345703,
+            "size_x": 5.000000953674316,
+            "size_y": 0.40000030398368838,
+            "rotation": 90.0,
+            "radius": 0.0
+        },
+        {
+            "name": "TopPathRight",
+            "type": "Target",
+            "x": 6.4993133544921879,
+            "y": 18.66503143310547,
+            "size_x": 5.999999523162842,
+            "size_y": 0.3999999463558197,
+            "rotation": 60.000003814697269,
+            "radius": 0.0
+        },
+        {
+            "name": "TopPathMiddle",
+            "type": "Target",
+            "x": 0.9493131637573242,
+            "y": 16.045032501220704,
+            "size_x": 10.000001907348633,
+            "size_y": 0.40000030398368838,
+            "rotation": 90.0,
+            "radius": 0.0
+        },
+        {
+            "name": "TopPathLeft",
+            "type": "Target",
+            "x": -8.350687026977539,
+            "y": 16.46503257751465,
+            "size_x": 10.000000953674317,
+            "size_y": 0.4000002145767212,
+            "rotation": 64.74235534667969,
+            "radius": 0.0
+        },
+        {
+            "name": "MainPathLeft",
+            "type": "Target",
+            "x": -13.720685958862305,
+            "y": 7.815032958984375,
+            "size_x": 10.0,
+            "size_y": 0.4000000059604645,
+            "rotation": 0.0,
+            "radius": 0.0
+        },
+        {
+            "name": "MainPathRight",
+            "type": "Target",
+            "x": 7.359313488006592,
+            "y": 7.885032653808594,
+            "size_x": 10.0,
+            "size_y": 0.4000000059604645,
+            "rotation": 0.0,
+            "radius": 0.0
+        },
+        {
+            "name": "Entrance",
+            "type": "Target",
+            "x": -2.550686836242676,
+            "y": -0.6649664640426636,
+            "size_x": 15.0,
+            "size_y": 0.4000000059604645,
+            "rotation": 0.0,
+            "radius": 0.0
+        },
+        {
+            "name": "WarningZone (WZ)",
+            "type": "WarningZone",
+            "x": -3.180000066757202,
+            "y": 21.5176944732666,
+            "size_x": 8.0,
+            "size_y": 8.0,
+            "rotation": 0.0,
+            "radius": 4.0
+        },
+        {
+            "name": "WarningZone (WZ)",
+            "type": "WarningZone",
+            "x": 1.440000057220459,
+            "y": 5.260000228881836,
+            "size_x": 8.0,
+            "size_y": 8.0,
+            "rotation": 0.0,
+            "radius": 4.0
+        },
+        {
+            "name": "ArtifactTrigger (TZ)",
+            "type": "TransitionZone",
+            "x": -3.180000066757202,
+            "y": 21.567163467407228,
+            "size_x": 4.0,
+            "size_y": 4.0,
+            "rotation": 0.0,
+            "radius": 2.0
+        },
+        {
+            "name": "ArtifactTrigger (TZ)",
+            "type": "TransitionZone",
+            "x": -7.5,
+            "y": 5.260000228881836,
+            "size_x": 4.0,
+            "size_y": 4.0,
+            "rotation": 0.0,
+            "radius": 2.0
+        },
+        {
+            "name": "ArtifactTrigger (TZ)",
+            "type": "TransitionZone",
+            "x": -18.058887481689454,
+            "y": 15.38222599029541,
+            "size_x": 4.0,
+            "size_y": 4.0,
+            "rotation": 0.0,
+            "radius": 2.0
+        },
+        {
+            "name": "ArtifactTrigger (TZ)",
+            "type": "TransitionZone",
+            "x": 1.440000057220459,
+            "y": 5.220000267028809,
+            "size_x": 4.0,
+            "size_y": 4.0,
+            "rotation": 0.0,
+            "radius": 2.0
+        }
+    ]
+}

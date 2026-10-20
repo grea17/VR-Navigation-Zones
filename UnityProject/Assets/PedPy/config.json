@@ -1,0 +1,10 @@
+{
+  "configNumber": 1476,
+  "sceneName": "WZ1",
+  "angularSpeed": 90.0,
+  "warningSpeedMultiplier": 0.5,
+  "wzRadius": 4.0,
+  "tzRadius": 2.0,
+  "posObiettivo": "Dentro WZ",
+  "campione": 23
+}
