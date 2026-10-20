@@ -153,8 +153,8 @@
         {
             "name": "ArtifactTrigger (TZ)",
             "type": "TransitionZone",
-            "x": -7.5,
-            "y": 5.260000228881836,
+            "x": -18.058887481689454,
+            "y": 15.38222599029541,
             "size_x": 4.0,
             "size_y": 4.0,
             "rotation": 0.0,
@@ -163,8 +163,8 @@
         {
             "name": "ArtifactTrigger (TZ)",
             "type": "TransitionZone",
-            "x": -18.058887481689454,
-            "y": 15.38222599029541,
+            "x": -7.5,
+            "y": 5.260000228881836,
             "size_x": 4.0,
             "size_y": 4.0,
             "rotation": 0.0,
